@@ -3,9 +3,6 @@
 // and avoid exposing internal details.
 pub use generated::client as virtual_keyboard_unstable_v1;
 
-//let mut file = File::create("foo.txt")?;
-//let raw_fd= file.as_raw_fd();
-
 mod generated {
     // The generated code tends to trigger a lot of warnings
     // so we isolate it into a very permissive module
