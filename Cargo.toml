@@ -3,8 +3,11 @@ name = "zwp-virtual-keyboard"
 version = "0.1.0"
 authors = ["pentamassiv <pentamassiv@posteo.de>"]
 edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+license = "MIT"
+description = "(Unsafe) Rust code generated with wayland-scanner crate for virtual_keyboard_unstable_v1 protocol"
+repository = "https://github.com/grelltrier/zwp-virtual-keyboard"
+keywords = ["wayland", "virtual_keyboard", "wayland-scanner", "unstable", "wayland-protocols"]
+categories = ["external-ffi-bindings", "gui", "os::linux-apis"]
 
 [dependencies]
 wayland-client = "0.27.0"
