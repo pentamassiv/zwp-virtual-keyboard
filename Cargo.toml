@@ -1,6 +1,6 @@
 [package]
 name = "zwp-virtual-keyboard"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["pentamassiv <pentamassiv@posteo.de>"]
 edition = "2018"
 license = "MIT"
@@ -10,8 +10,13 @@ keywords = ["wayland", "virtual_keyboard", "wayland-scanner", "unstable", "wayla
 categories = ["external-ffi-bindings", "gui", "os::linux-apis"]
 
 [dependencies]
-wayland-client = "0.27.0"
-wayland-commons = "0.27.0"
+wayland-client = "0.28.0"
+wayland-commons = "0.28.0"
 
 [build-dependencies]
-wayland-scanner = "0.27.0"
+wayland-scanner = "0.28.0"
+
+[dev-dependencies]
+tempfile = "3.1.0"
+memmap = "0.7"
+input_event_codes_hashmap = "0.1.0"
