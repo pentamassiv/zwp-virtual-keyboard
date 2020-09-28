@@ -2,7 +2,6 @@ use std::convert::TryInto;
 use std::io::{Seek, SeekFrom, Write};
 use std::os::unix::io::IntoRawFd;
 use std::time::Instant;
-use std::{thread, time};
 use tempfile::tempfile;
 use wayland_client::protocol::wl_seat::WlSeat;
 use wayland_client::Display;
@@ -13,6 +12,13 @@ use zwp_virtual_keyboard::virtual_keyboard_unstable_v1::zwp_virtual_keyboard_v1:
 
 mod keymap;
 mod wayland;
+
+#[derive(Debug, Clone)]
+pub enum SubmitError {
+    /// Virtual keyboard proxy was dropped and is no longer alive
+    NotAlive,
+    InvalidKeycode,
+}
 
 enum KeyMotion {
     Press = 1,
@@ -83,41 +89,55 @@ impl VKService {
     }
 
     // Press and then release the key
-    pub fn submit_keycode(&mut self, keycode: &str) {
+    pub fn submit_keycode(&self, keycode: &str) -> Result<(), SubmitError> {
         if let Some(keycode) = input_event_codes_hashmap::KEY.get(keycode) {
-            self.send_key(*keycode, KeyMotion::Press);
-
-            let ten_millis = time::Duration::from_millis(100);
-            thread::sleep(ten_millis);
-
-            self.send_key(*keycode, KeyMotion::Release);
+            let press_result = self.send_key(*keycode, KeyMotion::Press);
+            if press_result.is_ok() {
+                self.send_key(*keycode, KeyMotion::Release)
+            } else {
+                press_result
+            }
         } else {
-            println!("Not a valid keycode!")
+            Err(SubmitError::InvalidKeycode)
         }
     }
 
-    fn send_key(&self, keycode: u32, keymotion: KeyMotion) {
+    fn send_key(&self, keycode: u32, keymotion: KeyMotion) -> Result<(), SubmitError> {
         let time = self.get_time();
         println!("time: {}, keycode: {}", time, keycode);
-        self.virtual_keyboard.key(time, keycode, keymotion as u32);
+        if self.virtual_keyboard.as_ref().is_alive() {
+            self.virtual_keyboard.key(time, keycode, keymotion as u32);
+            Ok(())
+        } else {
+            Err(SubmitError::NotAlive)
+        }
     }
 
-    pub fn toggle_shift(&mut self) {
+    pub fn toggle_shift(&mut self) -> Result<(), SubmitError> {
         match self.shift_state {
             KeyState::Pressed => self.shift_state = KeyState::Released,
             KeyState::Released => self.shift_state = KeyState::Pressed,
         }
-        self.virtual_keyboard.modifiers(
-            self.shift_state as u32, //mods_depressed,
-            0,                       //mods_latched
-            0,                       //mods_locked
-            0,                       //group
-        )
+        if self.virtual_keyboard.as_ref().is_alive() {
+            self.virtual_keyboard.modifiers(
+                self.shift_state as u32, //mods_depressed,
+                0,                       //mods_latched
+                0,                       //mods_locked
+                0,                       //group
+            );
+            Ok(())
+        } else {
+            Err(SubmitError::NotAlive)
+        }
     }
 }
 
 fn main() {
+    println!("This example is currently NOT working. I suspect it has to do with how the wayland connection is established");
     let (display, event_queue, seat, vk_mgr) = wayland::init_wayland();
-    let mut vk_service = VKService::new(display, event_queue, &seat, vk_mgr);
-    vk_service.submit_keycode("X");
+    let vk_service = VKService::new(display, event_queue, &seat, vk_mgr);
+    let submission_result = vk_service.submit_keycode("X");
+    if submission_result.is_err() {
+        println!("Error: {:?}", submission_result);
+    };
 }
