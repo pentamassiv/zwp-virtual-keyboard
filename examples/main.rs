@@ -89,11 +89,24 @@ impl VKService {
     }
 
     // Press and then release the key
-    pub fn submit_keycode(&self, keycode: &str) -> Result<(), SubmitError> {
+    pub fn submit_keycode(&mut self, keycode: &str) -> Result<(), SubmitError> {
         if let Some(keycode) = input_event_codes_hashmap::KEY.get(keycode) {
             let press_result = self.send_key(*keycode, KeyMotion::Press);
+            self.event_queue
+                .sync_roundtrip(&mut (), |raw_event, _, _| {
+                    println!("Unhandled Event: {:?}", raw_event)
+                })
+                .unwrap();
             if press_result.is_ok() {
-                self.send_key(*keycode, KeyMotion::Release)
+                // Make the key press last two seconds
+                std::thread::sleep(std::time::Duration::from_millis(2000));
+                let result = self.send_key(*keycode, KeyMotion::Release);
+                self.event_queue
+                    .sync_roundtrip(&mut (), |raw_event, _, _| {
+                        println!("Unhandled Event: {:?}", raw_event)
+                    })
+                    .unwrap();
+                result
             } else {
                 press_result
             }
@@ -133,9 +146,8 @@ impl VKService {
 }
 
 fn main() {
-    println!("This example is currently NOT working. I suspect it has to do with how the wayland connection is established");
     let (display, event_queue, seat, vk_mgr) = wayland::init_wayland();
-    let vk_service = VKService::new(display, event_queue, &seat, vk_mgr);
+    let mut vk_service = VKService::new(display, event_queue, &seat, vk_mgr);
     let submission_result = vk_service.submit_keycode("X");
     if submission_result.is_err() {
         println!("Error: {:?}", submission_result);
