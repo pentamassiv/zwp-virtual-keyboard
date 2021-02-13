@@ -1,6 +1,6 @@
 [package]
 name = "zwp-virtual-keyboard"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["pentamassiv <pentamassiv@posteo.de>"]
 edition = "2018"
 license = "MIT"
@@ -17,6 +17,6 @@ wayland-commons = "0.28.0"
 wayland-scanner = "0.28.0"
 
 [dev-dependencies]
-tempfile = "3.1.0"
-memmap = "0.7"
+tempdir = "0.3.7"
+memmap2 = "0.2.1"
 input_event_codes_hashmap = "0.1.0"
