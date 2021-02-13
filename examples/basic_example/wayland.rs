@@ -1,4 +1,4 @@
-use wayland_client::{protocol::wl_seat::WlSeat, Display, EventQueue, GlobalManager, Main, Proxy};
+use wayland_client::{protocol::wl_seat::WlSeat, Display, EventQueue, GlobalManager, Main};
 use zwp_virtual_keyboard::virtual_keyboard_unstable_v1::zwp_virtual_keyboard_manager_v1::ZwpVirtualKeyboardManagerV1;
 
 fn get_wl_global_mgr(display: Display) -> (EventQueue, GlobalManager) {
@@ -39,7 +39,7 @@ pub fn init_wayland() -> (
     let display = Display::connect_to_env()
         .or_else(|_| Display::connect_to_name("wayland-0"))
         .unwrap();
-    let (mut event_queue, global_mgr) = get_wl_global_mgr(display.clone());
+    let (event_queue, global_mgr) = get_wl_global_mgr(display.clone());
     let seat = global_mgr.instantiate_exact::<WlSeat>(7).unwrap();
     let seat: WlSeat = WlSeat::from(seat.as_ref().clone());
     let vk_mgr = global_mgr

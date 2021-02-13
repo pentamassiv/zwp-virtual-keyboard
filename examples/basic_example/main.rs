@@ -2,7 +2,7 @@ use std::convert::TryInto;
 use std::io::{Seek, SeekFrom, Write};
 use std::os::unix::io::IntoRawFd;
 use std::time::Instant;
-use tempdir::tempfile;
+use tempfile::tempfile;
 use wayland_client::protocol::wl_seat::WlSeat;
 use wayland_client::Display;
 use wayland_client::EventQueue;
