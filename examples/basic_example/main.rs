@@ -4,7 +4,6 @@ use std::os::unix::io::IntoRawFd;
 use std::time::Instant;
 use tempfile::tempfile;
 use wayland_client::protocol::wl_seat::WlSeat;
-use wayland_client::Display;
 use wayland_client::EventQueue;
 use wayland_client::Main;
 use zwp_virtual_keyboard::virtual_keyboard_unstable_v1::zwp_virtual_keyboard_manager_v1::ZwpVirtualKeyboardManagerV1;
@@ -32,7 +31,6 @@ enum KeyState {
 }
 
 pub struct VKService {
-    display: Display,
     event_queue: EventQueue, // Preventing event_queue from being dropped
     base_time: std::time::Instant,
     shift_state: KeyState,
@@ -41,7 +39,6 @@ pub struct VKService {
 
 impl VKService {
     pub fn new(
-        display: Display,
         event_queue: EventQueue,
         seat: &WlSeat,
         vk_mgr: Main<ZwpVirtualKeyboardManagerV1>,
@@ -50,7 +47,6 @@ impl VKService {
         let shift_state = KeyState::Released;
         let virtual_keyboard = vk_mgr.create_virtual_keyboard(&seat);
         let vk_service = VKService {
-            display,
             event_queue,
             base_time,
             shift_state,
@@ -146,8 +142,8 @@ impl VKService {
 }
 
 fn main() {
-    let (display, event_queue, seat, vk_mgr) = wayland::init_wayland();
-    let mut vk_service = VKService::new(display, event_queue, &seat, vk_mgr);
+    let (_, event_queue, seat, vk_mgr) = wayland::init_wayland();
+    let mut vk_service = VKService::new(event_queue, &seat, vk_mgr);
     let submission_result = vk_service.submit_keycode("X");
     if submission_result.is_err() {
         println!("Error: {:?}", submission_result);
