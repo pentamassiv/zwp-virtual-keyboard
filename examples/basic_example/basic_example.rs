@@ -2,7 +2,7 @@ use std::convert::TryInto;
 use std::io::{Seek, SeekFrom, Write};
 use std::os::unix::io::IntoRawFd;
 use std::time::Instant;
-use tempfile::tempfile;
+use tempdir::tempfile;
 use wayland_client::protocol::wl_seat::WlSeat;
 use wayland_client::Display;
 use wayland_client::EventQueue;
@@ -72,7 +72,7 @@ impl VKService {
         keymap_file.write_all(&[0]).unwrap();
         keymap_file.seek(SeekFrom::Start(0)).unwrap();
         let mut data = unsafe {
-            memmap::MmapOptions::new()
+            memmap2::MmapOptions::new()
                 .map_mut(&keymap_file)
                 .expect("Could not access data from memory mapped file")
         };
