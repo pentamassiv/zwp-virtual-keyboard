@@ -2,7 +2,7 @@
 name = "zwp-virtual-keyboard"
 version = "0.2.4"
 authors = ["pentamassiv <pentamassiv@posteo.de>"]
-edition = "2018"
+edition = "2021"
 license = "MIT"
 description = "(Unsafe) Rust code generated with wayland-scanner crate for virtual_keyboard_unstable_v1 protocol"
 repository = "https://github.com/grelltrier/zwp-virtual-keyboard"
