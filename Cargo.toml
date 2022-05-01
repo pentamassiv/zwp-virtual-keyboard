@@ -5,7 +5,8 @@ authors = ["pentamassiv <pentamassiv@posteo.de>"]
 edition = "2021"
 license = "MIT"
 description = "(Unsafe) Rust code generated with wayland-scanner crate for virtual_keyboard_unstable_v1 protocol"
-repository = "https://github.com/grelltrier/zwp-virtual-keyboard"
+repository = "https://github.com/pentamassiv/zwp-virtual-keyboard"
+documentation = "https://docs.rs/zwp-virtual-keyboard/"
 keywords = ["wayland", "virtual_keyboard", "wayland-scanner", "unstable", "wayland-protocols"]
 categories = ["external-ffi-bindings", "gui", "os::linux-apis"]
 
