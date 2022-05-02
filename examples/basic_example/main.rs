@@ -162,6 +162,7 @@ fn main() {
     if submission_result.is_err() {
         println!("Error: {:?}", submission_result);
     };
+    println!("Long press done");
 
     // Toggle shift and long press x
     let submission_result = vk_service.toggle_shift();
@@ -172,6 +173,7 @@ fn main() {
     if submission_result.is_err() {
         println!("Error: {:?}", submission_result);
     };
+    println!("First toggle shift and long press x");
 
     // Toggle shift and long press x
     let submission_result = vk_service.toggle_shift();
@@ -182,4 +184,5 @@ fn main() {
     if submission_result.is_err() {
         println!("Error: {:?}", submission_result);
     };
+    println!("Second toggle shift and long press x");
 }
