@@ -96,12 +96,10 @@ impl VKService {
     // Press and then release the key
     pub fn long_press_keycode(&mut self, keycode: KeyCode) -> Result<(), SubmitError> {
         let press_result = self.send_key(keycode, KeyState::Pressed);
-        self.send_event();
         if press_result.is_ok() {
             // Make the key press last two seconds
             std::thread::sleep(Duration::from_millis(2000));
             let result = self.send_key(keycode, KeyState::Released);
-            self.send_event();
             result
         } else {
             press_result
@@ -118,6 +116,7 @@ impl VKService {
         if self.virtual_keyboard.as_ref().is_alive() {
             self.virtual_keyboard
                 .key(time, keycode, desired_key_state as u32);
+            self.send_event();
             Ok(())
         } else {
             Err(SubmitError::NotAlive)
@@ -145,6 +144,7 @@ impl VKService {
                 mods_locked,    //mods_locked
                 group,          //group
             );
+            self.send_event();
             Ok(())
         } else {
             Err(SubmitError::NotAlive)
@@ -155,7 +155,6 @@ impl VKService {
 fn main() {
     let (_, event_queue, seat, vk_mgr) = wayland::init_wayland();
     let mut vk_service = VKService::new(event_queue, &seat, vk_mgr);
-    let key = input_event_codes::KEY_X!();
 
     // Long press K
     let key = input_event_codes::KEY_K!();
