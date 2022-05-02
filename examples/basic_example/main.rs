@@ -124,17 +124,17 @@ impl VKService {
     }
 
     pub fn toggle_shift(&mut self) -> Result<(), SubmitError> {
-        let shift_key = input_event_codes::KEY_X!();
+        let shift_flag = 0x1;
         let (mut mods_depressed, mut _mods_latched, mut mods_locked, group) = (0, 0, 0, 0);
 
         match self.shift_state {
             KeyState::Pressed => {
                 self.shift_state = KeyState::Released;
-                mods_depressed = shift_key;
+                mods_depressed = shift_flag;
             }
             KeyState::Released => {
                 self.shift_state = KeyState::Pressed;
-                mods_locked = shift_key;
+                mods_locked = shift_flag;
             }
         }
         if self.virtual_keyboard.as_ref().is_alive() {
@@ -153,6 +153,7 @@ impl VKService {
 }
 
 fn main() {
+    println!("Start");
     let (_, event_queue, seat, vk_mgr) = wayland::init_wayland();
     let mut vk_service = VKService::new(event_queue, &seat, vk_mgr);
 
