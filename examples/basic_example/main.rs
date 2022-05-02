@@ -157,14 +157,16 @@ fn main() {
     let mut vk_service = VKService::new(event_queue, &seat, vk_mgr);
     let key = input_event_codes::KEY_X!();
 
-    // Long press x
+    // Long press K
+    let key = input_event_codes::KEY_K!();
     let submission_result = vk_service.long_press_keycode(key);
     if submission_result.is_err() {
         println!("Error: {:?}", submission_result);
     };
     println!("Long press done");
 
-    // Toggle shift and long press x
+    // Toggle shift and long press E
+    let key = input_event_codes::KEY_E!();
     let submission_result = vk_service.toggle_shift();
     if submission_result.is_err() {
         println!("Error: {:?}", submission_result);
@@ -175,7 +177,8 @@ fn main() {
     };
     println!("First toggle shift and long press x");
 
-    // Toggle shift and long press x
+    // Toggle shift and long press Y
+    let key = input_event_codes::KEY_Y!();
     let submission_result = vk_service.toggle_shift();
     if submission_result.is_err() {
         println!("Error: {:?}", submission_result);
