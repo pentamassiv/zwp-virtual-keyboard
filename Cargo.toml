@@ -1,6 +1,6 @@
 [package]
 name = "zwp-virtual-keyboard"
-version = "0.2.5"
+version = "0.2.6"
 authors = ["pentamassiv <pentamassiv@posteo.de>"]
 edition = "2021"
 license = "MIT"
