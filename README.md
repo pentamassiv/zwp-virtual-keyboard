@@ -1,5 +1,6 @@
 [![Crate](https://img.shields.io/crates/v/zwp-virtual-keyboard.svg)](https://crates.io/crates/zwp-virtual-keyboard)
 [![dependency status](https://deps.rs/repo/github/grelltrier/zwp-virtual-keyboard/status.svg)](https://deps.rs/repo/github/grelltrier/zwp-virtual-keyboard)
+[![docs.rs](https://docs.rs/zwp-virtual-keyboard/badge.svg)](https://docs.rs/zwp-virtual-keyboard)
 ![Build](https://github.com/grelltrier/zwp-virtual-keyboard/workflows/Build/badge.svg)
 
 # zwp-virtual-keyboard
