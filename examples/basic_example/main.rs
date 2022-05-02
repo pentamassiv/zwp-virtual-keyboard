@@ -98,7 +98,7 @@ impl VKService {
         let press_result = self.send_key(keycode, KeyState::Pressed);
         if press_result.is_ok() {
             // Make the key press last two seconds
-            std::thread::sleep(Duration::from_millis(500));
+            std::thread::sleep(Duration::from_millis(1000));
             let result = self.send_key(keycode, KeyState::Released);
             result
         } else {
