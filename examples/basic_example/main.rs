@@ -125,23 +125,24 @@ impl VKService {
 
     pub fn toggle_shift(&mut self) -> Result<(), SubmitError> {
         let shift_flag = 0x1;
-        let (mut mods_depressed, mut _mods_latched, mut mods_locked, group) = (0, 0, 0, 0);
+        let mods_depressed;
+        let (_mods_latched, _mods_locked, group) = (0, 0, 0);
 
         match self.shift_state {
             KeyState::Pressed => {
                 self.shift_state = KeyState::Released;
-                mods_depressed = shift_flag;
+                mods_depressed = 0;
             }
             KeyState::Released => {
                 self.shift_state = KeyState::Pressed;
-                mods_locked = shift_flag;
+                mods_depressed = shift_flag;
             }
         }
         if self.virtual_keyboard.as_ref().is_alive() {
             self.virtual_keyboard.modifiers(
                 mods_depressed, //mods_depressed,
                 _mods_latched,  //mods_latched
-                mods_locked,    //mods_locked
+                _mods_locked,   //mods_locked
                 group,          //group
             );
             self.send_event();
