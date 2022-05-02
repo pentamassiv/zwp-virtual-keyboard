@@ -20,4 +20,4 @@ wayland-scanner = "0.29"
 [dev-dependencies]
 tempfile = "3.2"
 memmap2 = "0.5"
-input_event_codes_hashmap = "0.1"
+input-event-codes = "5.16.8"

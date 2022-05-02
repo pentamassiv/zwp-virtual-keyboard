@@ -1,27 +1,22 @@
+use std::convert::AsRef;
 use std::convert::TryInto;
 use std::io::{Seek, SeekFrom, Write};
 use std::os::unix::io::IntoRawFd;
-use std::time::Instant;
+use std::time::{Duration, Instant};
 use tempfile::tempfile;
-use wayland_client::protocol::wl_seat::WlSeat;
-use wayland_client::EventQueue;
-use wayland_client::Main;
+use wayland_client::{protocol::wl_seat::WlSeat, EventQueue, Main};
 use zwp_virtual_keyboard::virtual_keyboard_unstable_v1::zwp_virtual_keyboard_manager_v1::ZwpVirtualKeyboardManagerV1;
 use zwp_virtual_keyboard::virtual_keyboard_unstable_v1::zwp_virtual_keyboard_v1::ZwpVirtualKeyboardV1;
 
 mod keymap;
 mod wayland;
 
+type KeyCode = u32;
+
 #[derive(Debug, Clone)]
 pub enum SubmitError {
     /// Virtual keyboard proxy was dropped and is no longer alive
     NotAlive,
-    InvalidKeycode,
-}
-
-enum KeyMotion {
-    Press = 1,
-    Release = 0,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -78,44 +73,50 @@ impl VKService {
             .keymap(1, keymap_raw_fd, keymap_size_u32);
     }
 
-    fn get_time(&self) -> u32 {
+    fn get_duration(&mut self) -> u32 {
         let duration = self.base_time.elapsed();
-        let time = duration.as_millis();
-        time.try_into().unwrap()
-    }
-
-    // Press and then release the key
-    pub fn submit_keycode(&mut self, keycode: &str) -> Result<(), SubmitError> {
-        if let Some(keycode) = input_event_codes_hashmap::KEY.get(keycode) {
-            let press_result = self.send_key(*keycode, KeyMotion::Press);
-            self.event_queue
-                .sync_roundtrip(&mut (), |raw_event, _, _| {
-                    println!("Unhandled Event: {:?}", raw_event)
-                })
-                .unwrap();
-            if press_result.is_ok() {
-                // Make the key press last two seconds
-                std::thread::sleep(std::time::Duration::from_millis(2000));
-                let result = self.send_key(*keycode, KeyMotion::Release);
-                self.event_queue
-                    .sync_roundtrip(&mut (), |raw_event, _, _| {
-                        println!("Unhandled Event: {:?}", raw_event)
-                    })
-                    .unwrap();
-                result
-            } else {
-                press_result
-            }
+        let duration = duration.as_millis();
+        if let Ok(duration) = duration.try_into() {
+            duration
         } else {
-            Err(SubmitError::InvalidKeycode)
+            // Reset the base time if it was too big for a u32
+            self.base_time = Instant::now();
+            self.get_duration()
         }
     }
 
-    fn send_key(&self, keycode: u32, keymotion: KeyMotion) -> Result<(), SubmitError> {
-        let time = self.get_time();
+    fn send_event(&mut self) {
+        self.event_queue
+            .sync_roundtrip(&mut (), |raw_event, _, _| {
+                println!("Unhandled Event: {:?}", raw_event)
+            })
+            .unwrap();
+    }
+
+    // Press and then release the key
+    pub fn long_press_keycode(&mut self, keycode: KeyCode) -> Result<(), SubmitError> {
+        let press_result = self.send_key(keycode, KeyState::Pressed);
+        if press_result.is_ok() {
+            // Make the key press last two seconds
+            std::thread::sleep(Duration::from_millis(1000));
+            let result = self.send_key(keycode, KeyState::Released);
+            result
+        } else {
+            press_result
+        }
+    }
+
+    fn send_key(
+        &mut self,
+        keycode: KeyCode,
+        desired_key_state: KeyState,
+    ) -> Result<(), SubmitError> {
+        let time = self.get_duration();
         println!("time: {}, keycode: {}", time, keycode);
         if self.virtual_keyboard.as_ref().is_alive() {
-            self.virtual_keyboard.key(time, keycode, keymotion as u32);
+            self.virtual_keyboard
+                .key(time, keycode, desired_key_state as u32);
+            self.send_event();
             Ok(())
         } else {
             Err(SubmitError::NotAlive)
@@ -123,17 +124,29 @@ impl VKService {
     }
 
     pub fn toggle_shift(&mut self) -> Result<(), SubmitError> {
+        // For the modifiers different codes have to be used. Use a bitmap to activate multiple modifiers at once
+        let shift_flag = 0x1;
+        let mods_depressed;
+        let (_mods_latched, _mods_locked, group) = (0, 0, 0);
+
         match self.shift_state {
-            KeyState::Pressed => self.shift_state = KeyState::Released,
-            KeyState::Released => self.shift_state = KeyState::Pressed,
+            KeyState::Pressed => {
+                self.shift_state = KeyState::Released;
+                mods_depressed = 0;
+            }
+            KeyState::Released => {
+                self.shift_state = KeyState::Pressed;
+                mods_depressed = shift_flag;
+            }
         }
         if self.virtual_keyboard.as_ref().is_alive() {
             self.virtual_keyboard.modifiers(
-                self.shift_state as u32, //mods_depressed,
-                0,                       //mods_latched
-                0,                       //mods_locked
-                0,                       //group
+                mods_depressed, //mods_depressed,
+                _mods_latched,  //mods_latched
+                _mods_locked,   //mods_locked
+                group,          //group
             );
+            self.send_event();
             Ok(())
         } else {
             Err(SubmitError::NotAlive)
@@ -142,10 +155,39 @@ impl VKService {
 }
 
 fn main() {
+    println!("Start");
     let (_, event_queue, seat, vk_mgr) = wayland::init_wayland();
     let mut vk_service = VKService::new(event_queue, &seat, vk_mgr);
-    let submission_result = vk_service.submit_keycode("X");
+
+    // Long press K
+    let key = input_event_codes::KEY_K!();
+    let submission_result = vk_service.long_press_keycode(key);
     if submission_result.is_err() {
         println!("Error: {:?}", submission_result);
     };
+    println!("Long press done");
+
+    // Toggle shift and long press E
+    let key = input_event_codes::KEY_E!();
+    let submission_result = vk_service.toggle_shift();
+    if submission_result.is_err() {
+        println!("Error: {:?}", submission_result);
+    };
+    let submission_result = vk_service.long_press_keycode(key);
+    if submission_result.is_err() {
+        println!("Error: {:?}", submission_result);
+    };
+    println!("First toggle shift and long press x");
+
+    // Toggle shift and long press Y
+    let key = input_event_codes::KEY_Y!();
+    let submission_result = vk_service.toggle_shift();
+    if submission_result.is_err() {
+        println!("Error: {:?}", submission_result);
+    };
+    let submission_result = vk_service.long_press_keycode(key);
+    if submission_result.is_err() {
+        println!("Error: {:?}", submission_result);
+    };
+    println!("Second toggle shift and long press x");
 }
