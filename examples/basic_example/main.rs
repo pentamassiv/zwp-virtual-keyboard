@@ -124,6 +124,7 @@ impl VKService {
     }
 
     pub fn toggle_shift(&mut self) -> Result<(), SubmitError> {
+        // For the modifiers different codes have to be used. Use a bitmap to activate multiple modifiers at once
         let shift_flag = 0x1;
         let mods_depressed;
         let (_mods_latched, _mods_locked, group) = (0, 0, 0);
