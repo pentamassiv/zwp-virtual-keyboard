@@ -2,6 +2,7 @@
 [![dependency status](https://deps.rs/repo/github/grelltrier/zwp-virtual-keyboard/status.svg)](https://deps.rs/repo/github/grelltrier/zwp-virtual-keyboard)
 [![docs.rs](https://docs.rs/zwp-virtual-keyboard/badge.svg)](https://docs.rs/zwp-virtual-keyboard)
 ![Build](https://github.com/grelltrier/zwp-virtual-keyboard/workflows/Build/badge.svg)
+![dependabot status](https://img.shields.io/badge/dependabot-enabled-025e8c?logo=Dependabot)
 
 # zwp-virtual-keyboard
 Rust code generated with wayland-scanner crate for virtual_keyboard_unstable_v1 protocol. Some parts might not be safe, even though they are not marked ad "unsafe". One example is that you need to send the correct length of the file when sending a keymap. There might be more though.
