@@ -1,3 +1,6 @@
+# DEPRECATED: When I created this crate, the protocol was not available in the wayland_protocols_misc crate. Since v0.30.0-beta.10 it is available so there is no reason for this crate to continue to exits. Please use the wayland_protocols_misc crate instead.
+
+
 [![Crate](https://img.shields.io/crates/v/zwp-virtual-keyboard.svg)](https://crates.io/crates/zwp-virtual-keyboard)
 [![dependency status](https://deps.rs/repo/github/grelltrier/zwp-virtual-keyboard/status.svg)](https://deps.rs/repo/github/grelltrier/zwp-virtual-keyboard)
 [![docs.rs](https://docs.rs/zwp-virtual-keyboard/badge.svg)](https://docs.rs/zwp-virtual-keyboard)
